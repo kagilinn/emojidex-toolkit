@@ -1,6 +1,6 @@
 Gem::Specification.new do |s|
   s.name        = 'emojidex-toolkit'
-  s.version     = '0.0.1'
+  s.version     = '0.0.2'
   s.license     = "GNU LGPL v3"
   s.summary     = "Ruby Toolkit for emojidex"
   s.description = "emojidex toolkit provides converters, search and lookup, listing and caching functionality and user info (favorites/etc)."

@@ -2,3 +2,5 @@
 *.swo
 Gemfile.lock
 *.gem
+spec/out/
+tmp/
