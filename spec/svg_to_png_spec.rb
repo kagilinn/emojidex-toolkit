@@ -1,4 +1,5 @@
 require 'spec_helper'
+require_relative '../lib/emojidex/converter.rb'
 
 describe 'Emojidex::Converter' do
   it 'uses convert! to convert an svg to a single png' do
