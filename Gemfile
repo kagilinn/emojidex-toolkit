@@ -12,3 +12,5 @@ group :development do
   gem 'rubocop'
   gem 'guard-rubocop'
 end
+
+gem 'emojidex-toolkit', path: '../emojidex-toolkit'

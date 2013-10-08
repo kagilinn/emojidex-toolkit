@@ -8,6 +8,7 @@ module Emojidex
     def initialize
       file = File.join(File.dirname(File.expand_path(__FILE__)),
                        './utf/utf-emoji.json')
+      p file.class
       @list = JSON.parse file
     end
 
