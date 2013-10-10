@@ -4,6 +4,8 @@ module Emojidex
   # listing, search and on-the-fly conversion of standard UTF emoji
   class UTF
     attr_reader :list
+    attr_reader :categories
+    alias categorys categories
 
     def initialize
       json_path = File.join(File.dirname(File.expand_path(__FILE__)),
@@ -11,12 +13,17 @@ module Emojidex
 
       # lookup-table to emoji from unicode & emoji-name
       @lookup_unicode, @lookup_name = {}, {}
+      @categories = {}
 
-      @list = JSON.parse(IO.read(json_path)).map {|hash| Emoji.new(hash).freeze }
-      @list.each do |emoji|
+      @list = JSON.parse(IO.read(json_path)).map {|hash|
+        emoji = Emoji.new(hash)
+        @categories[hash['category']] ||= []
+        @categories[hash['category']] << emoji
         @lookup_unicode[emoji.unicode] = emoji
         @lookup_name[emoji.name] = emoji
-      end
+        emoji
+      }
+      @categories.freeze
     end
 
     def where(options = {})
