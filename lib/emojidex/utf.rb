@@ -8,8 +8,8 @@ module Emojidex
     def initialize
       json_path = File.join(File.dirname(File.expand_path(__FILE__)),
                        './utf/utf-emoji.json')
-      @list = JSON.parse(IO.read(json_path)).map {|hash| Emoji.new(hash).freeze }
       @lookup_unicode, @lookup_name = {}, {}
+      @list = JSON.parse(IO.read(json_path)).map {|hash| Emoji.new(hash).freeze }
       @list.each do |emoji|
         @lookup_unicode[emoji.unicode] = emoji
         @lookup_name[emoji.name] = emoji
