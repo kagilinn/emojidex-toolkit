@@ -8,12 +8,11 @@ module Emojidex
     def initialize
       json_path = File.join(File.dirname(File.expand_path(__FILE__)),
                        './utf/utf-emoji.json')
-      @list = JSON.parse(IO.read(json_path))
+      @list = JSON.parse(IO.read(json_path)).map {|hash| Emoji.new(hash).freeze }
       @lookup_unicode, @lookup_name = {}, {}
       @list.each do |emoji|
-        emoji['xml'] = %|<emoji name="#{emoji['name']}" />|
-        @lookup_unicode[emoji['moji']] = emoji
-        @lookup_name[emoji['name']] = emoji
+        @lookup_unicode[emoji.unicode] = emoji
+        @lookup_name[emoji.name] = emoji
       end
     end
 
@@ -56,7 +55,7 @@ private
     def emojify_unicode_xml(src_str)
       return src_str.chars.map {|c|
         emoji = @lookup_unicode[c]
-        emoji ? emoji['xml'] : c
+        emoji ? emoji.xml : c
       }.join('')
     end
 
@@ -67,7 +66,7 @@ private
         emoji_name, rest = $2, $3
         emoji = @lookup_name[emoji_name]
         if emoji
-          result += emoji['xml']
+          result += emoji.xml
           s = rest
         else
           result += ':'
