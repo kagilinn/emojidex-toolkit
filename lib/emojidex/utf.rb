@@ -11,8 +11,8 @@ module Emojidex
       @lookup_unicode, @lookup_name = {}, {}
       @list = JSON.parse(IO.read(json_path)).map {|hash|
         emoji = Emoji.new(hash).freeze
-        @lookup_unicode[hash['moji']] = emoji
-        @lookup_name[hash['name']] = emoji
+        @lookup_unicode[emoji.unicode] = emoji
+        @lookup_name[emoji.name] = emoji
         emoji
       }
     end
@@ -20,36 +20,41 @@ module Emojidex
     def where(options = {})
     end
 
-    def emojify(src_str, &iter_block)
-      if iter_block.nil?
-        src_str.lines.map {|line|
-          emojify_unicode_xml(emojify_tag_xml(line))
-        }.join("\n")
-      else
-        temp = ''
-        src_str.chars.each do |chr|
-          emoji = @lookup_unicode[chr]
-          if emoji
-            yield temp.dup unless temp == ''
-            temp = ''
-            yield emoji
-          elsif chr == "\n"
-            yield temp + "\n"
-            temp = ''
-          elsif chr == ':'
-            temp += chr
-            next unless temp =~ /^(.*)\:([^:]+)\:$/o
-            s, emoji_name = $1, $2
-            next unless emoji = @lookup_name[emoji_name]
-            yield s unless temp == ''
-            yield emoji
-            temp = ''
-          else
-            temp += chr
-          end
+    def emojify(src_str)
+      return emojify_each(src_str).map {|obj|
+        case obj
+          when String then obj
+          when Emoji then obj.xml
         end
-        yield temp unless temp == ''
+      }.join('')
+    end
+
+    def emojify_each(src_str)
+      # if no blocks given, returns Enumerator
+      return to_enum(:emojify_each, src_str) unless block_given?
+      temp = ''
+      src_str.chars.each do |chr|
+        emoji = @lookup_unicode[chr]
+        if emoji
+          yield temp.dup unless temp == ''
+          temp = ''
+          yield emoji
+        elsif chr == "\n"
+          yield temp + "\n"
+          temp = ''
+        elsif chr == ':'
+          temp += chr
+          next unless temp =~ /^(.*)\:([^:]+)\:$/o
+          s, emoji_name = $1, $2
+          next unless emoji = @lookup_name[emoji_name]
+          yield s unless temp == ''
+          yield emoji
+          temp = ''
+        else
+          temp += chr
+        end
       end
+      yield temp unless temp == ''
     end
 
 private
