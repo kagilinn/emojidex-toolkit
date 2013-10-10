@@ -28,7 +28,7 @@ module Emojidex
       @category_name = emoji_data['category']
       @category_name.freeze
 
-      @inspect = "#<Emojidex::Emoji #{category_name}#{to_s} `#{unicode}'>"
+      @inspect = "#<Emojidex::Emoji #{category_name}#{to_s} #{unicode}  >"
     end
   end
 end
