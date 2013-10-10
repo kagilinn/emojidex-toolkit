@@ -33,6 +33,7 @@ module Emojidex
       @def_format = :png
     end
 
+    # convert one file
     def convert!(source, destination, size = @def_size, format = @def_format)
       if FileTest.exist?(source) && FileTest.exist?(destination)
         return nil if File.mtime(source) < File.mtime(destination)
@@ -48,6 +49,7 @@ module Emojidex
       end
     end
 
+    # convert one SVG to each-size PNGs
     def convert_standard_sizes!(source, destination, format = @def_format)
       @basic_sizes.each do |size|
         convert!(source, get_sized_destination(destination, size.to_s),
@@ -60,6 +62,7 @@ module Emojidex
       end
     end
 
+    # convert SVG to each-size PNGs, specify by emoji-name
     def convert_from_name!(emoji_name, dest_path, format = :png)    # String, String, Symbol = :png
       src = File.dirname(File.expand_path(__FILE__)) + "/utf/#{emoji_name}"
       src = (if FileTest.directory?(src)
