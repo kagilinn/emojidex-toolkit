@@ -10,12 +10,11 @@ module Emojidex
                        './utf/utf-emoji.json')
       @lookup_unicode, @lookup_name = {}, {}
       @list = JSON.parse(IO.read(json_path)).map {|hash|
-        Emoji.new(hash).freeze
+        emoji = Emoji.new(hash).freeze
+        @lookup_unicode[hash['moji']] = emoji
+        @lookup_name[hash['name']] = emoji
+        emoji
       }
-      @list.each do |emoji|
-        @lookup_unicode[emoji.unicode] = emoji
-        @lookup_name[emoji.name] = emoji
-      end
     end
 
     def where(options = {})
