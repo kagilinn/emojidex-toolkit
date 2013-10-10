@@ -18,7 +18,7 @@ module Emojidex
       utf = UTF.new
       conv = self.new
       utf.list.each do |emoji|
-        conv.convert_from_name! emoji['name'], dest_dir_path, format
+        conv.convert_from_name! emoji.name, dest_dir_path, format
       end
     end
 
