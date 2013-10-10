@@ -10,7 +10,21 @@ module Emojidex
   # Provides conversion facilities to create emoji 'glyphs'
   # from source images.
   class Converter
+    #
+    # class methods
+    #
+    def self.convert_all!(dest_dir_path, format = :png)
+      FileTest.directory?(dest_dir_path) or raise "#{dest_dir_path} is not a directory"
+      utf = UTF.new
+      conv = self.new
+      utf.list.each do |emoji|
+        conv.convert_from_name! emoji['name'], dest_dir_path, format
+      end
+    end
 
+    #
+    # instance methods
+    #
     def initialize
       @basic_sizes = [8, 16, 32, 64, 128, 256]
       @resource_sizes = { ldpi: 9, mdpi: 18, hdpi: 27, xhdpi: 36 }
@@ -20,6 +34,10 @@ module Emojidex
     end
 
     def convert!(source, destination, size = @def_size, format = @def_format)
+      if FileTest.exist?(source) && FileTest.exist?(destination)
+        return nil if File.mtime(source) < File.mtime(destination)
+      end
+
       surface = get_surface(source, size)
 
       create_target_path! File.dirname(destination)
@@ -40,6 +58,26 @@ module Emojidex
         convert!(source, get_sized_destination(destination, size.to_s),
                  px, format)
       end
+    end
+
+    def convert_from_name!(emoji_name, dest_path, format = :png)    # String, String, Symbol = :png
+      src = File.dirname(File.expand_path(__FILE__)) + "/utf/#{emoji_name}"
+      src = (if FileTest.directory?(src)
+        src + '/0.svg'
+      else
+        src + '.svg'
+      end)
+
+      # if dest is a directory-path, then make picture's path from emoji-name.
+      dest = (if !FileTest.directory?(dest_path)
+        dest_path
+      elsif dest_path[-1] == File::ALT_SEPARATOR || dest_path[-1] == File::SEPARATOR
+        "#{dest_path}#{emoji_name}.#{format}"
+      else
+        "#{dest_path}/#{emoji_name}.#{format}"
+      end)
+
+      convert_standard_sizes! src, dest, format
     end
 
     private

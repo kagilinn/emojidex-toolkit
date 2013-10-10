@@ -20,21 +20,47 @@ module Emojidex
     def where(options = {})
     end
 
-    def emojify(src_str)
-      src_str.lines.map {|line|
-        emojify_unicode(emojify_tag(line))
-      }.join("\n")
+    def emojify(src_str, &iter_block)
+      if iter_block.nil?
+        src_str.lines.map {|line|
+          emojify_unicode_xml(emojify_tag_xml(line))
+        }.join("\n")
+      else
+        temp = ''
+        src_str.chars.each do |chr|
+          emoji = @lookup_unicode[chr]
+          if emoji
+            yield temp.dup unless temp == ''
+            temp = ''
+            yield emoji
+          elsif chr == "\n"
+            yield temp + "\n"
+            temp = ''
+          elsif chr == ':'
+            temp += chr
+            next unless temp =~ /^(.*)\:([^:]+)\:$/o
+            s, emoji_name = $1, $2
+            next unless emoji = @lookup_name[emoji_name]
+            yield s unless temp == ''
+            yield emoji
+            temp = ''
+          else
+            temp += chr
+          end
+        end
+        yield temp unless temp == ''
+      end
     end
 
 private
-    def emojify_unicode(src_str)
+    def emojify_unicode_xml(src_str)
       return src_str.chars.map {|c|
         emoji = @lookup_unicode[c]
         emoji ? emoji['xml'] : c
       }.join('')
     end
 
-    def emojify_tag(src_str)
+    def emojify_tag_xml(src_str)
       result, s = '', src_str
       while s =~ /^([^:]*)\:([^:]+)\:(.*)$/o
         result += $1
