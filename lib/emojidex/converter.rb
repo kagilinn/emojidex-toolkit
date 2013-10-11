@@ -14,7 +14,8 @@ module Emojidex
     # class methods
     #
     def self.convert_all!(utf, dest_dir_path, format = :png)
-      Dir.mkdir(dest_dir_path) unless FileTest.directory?(dest_dir_path)
+      Dir.mkdir(dest_dir_path) unless FileText.exist?(dest_dir_path)
+      raise("%p is not a directory" % dest_dir_path) if FileTest.directory?(dest_dir_path)
       conv = self.new
       utf.list.each do |emoji|
         conv.convert_from_name! emoji.name, dest_dir_path, format
