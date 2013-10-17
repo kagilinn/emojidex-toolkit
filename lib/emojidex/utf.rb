@@ -35,7 +35,11 @@ module Emojidex
 
     def each
       return to_enum(:each) unless block_given?
-      list.each{|emoji| yield emoji }
+      @list.each{|emoji| yield emoji }
+    end
+
+    def where_name(name)
+      return @lookup_name[name]
     end
 
     def where(options = {})
