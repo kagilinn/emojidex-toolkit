@@ -3,7 +3,8 @@ require 'json'
 module Emojidex
   # listing, search and on-the-fly conversion of standard UTF emoji
   class UTF
-    attr_reader :list
+    include Enumerable
+
     attr_reader :categories
     alias categorys categories
 
@@ -20,7 +21,8 @@ module Emojidex
       @lookup_unicode, @lookup_name = {}, {}
       @categories = {}
 
-      @list = JSON.parse(IO.read(json_path)).map {|hash|
+      @json = JSON.parse(IO.read(json_path))
+      @list = @json.map {|hash|
         emoji = Emoji.new(hash)
         @categories[hash['category']] ||= []
         @categories[hash['category']] << emoji
@@ -31,7 +33,15 @@ module Emojidex
       @categories.freeze
     end
 
+    def each
+      return to_enum(:each) unless block_given?
+      list.each{|emoji| yield emoji }
+    end
+
     def where(options = {})
+      return @json.select {|h|
+        options.all? {|key, value| hash[key] == value }
+      }.map{|h| @lookup_name[h['name']] }
     end
 
     def compile_assets(dest_dir_path)
@@ -40,10 +50,7 @@ module Emojidex
 
     def emojify(src_str)
       return emojify_each(src_str).map {|obj|
-        case obj
-          when String then obj
-          when Emoji then obj.xml
-        end
+        obj.to_s
       }.join('')
     end
 

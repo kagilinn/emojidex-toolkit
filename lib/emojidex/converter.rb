@@ -4,7 +4,6 @@ require 'json'
 require 'rsvg2'
 require 'filemagic'
 require 'RMagick'
-# require 'rapngasm'
 
 module Emojidex
   # Provides conversion facilities to create emoji 'glyphs'
@@ -14,8 +13,11 @@ module Emojidex
     # class methods
     #
     def self.convert_all!(utf, dest_dir_path, format = :png)
-      Dir.mkdir(dest_dir_path) unless FileText.exist?(dest_dir_path)
-      raise("%p is not a directory" % dest_dir_path) if FileTest.directory?(dest_dir_path)
+      Dir.mkdir(dest_dir_path) unless FileTest.exist?(dest_dir_path)
+      dest_dir_path = File.expand_path(dest_dir_path)
+      unless FileTest.directory?(dest_dir_path)
+        raise "%p is not a directory" % dest_dir_path
+      end
       conv = self.new
       utf.list.each do |emoji|
         conv.convert_from_name! emoji.name, dest_dir_path, format
@@ -83,8 +85,7 @@ module Emojidex
       convert_standard_sizes! src, dest, format
     end
 
-    private
-
+  private
     def get_surface(source, size)
       fm = FileMagic.new
       mime = fm.file source
