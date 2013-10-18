@@ -74,13 +74,13 @@ module Emojidex
 
   private
     # convert one file
-    def convert!(source, destination, size = @def_size, format = @def_format)
-      if FileTest.exist?(source) && FileTest.exist?(destination)
-        return nil if File.mtime(source) < File.mtime(destination)
+    def convert!(source, dest, size = @def_size, format = @def_format)
+      if FileTest.exist?(source) && FileTest.exist?(dest)
+        return nil if File.mtime(source) < File.mtime(dest)
       end
       surface = get_surface(source, size)
-      create_target_path! File.dirname(destination)
-      surface.write_to_png destination if format == :png
+      create_target_path! File.dirname(dest)
+      surface.write_to_png dest if format == :png
     end
 
     # convert one SVG to each-size PNGs
