@@ -4,23 +4,23 @@ require 'json'
 require 'rsvg2'
 require 'filemagic'
 require 'RMagick'
+require 'fileutils'
 
 module Emojidex
   # Provides conversion facilities to create emoji 'glyphs'
   # from source images.
   class Converter
-    #
-    # class methods
-    #
-    def self.convert_all!(utf, dest_dir_path, format = :png)
-      Dir.mkdir(dest_dir_path) unless FileTest.exist?(dest_dir_path)
-      dest_dir_path = File.expand_path(dest_dir_path)
+    # options = {
+    #   format: Symbol = @def_format,
+    #   size: Fixnum/Symbol = nil(ALL sizes)
+    # }
+    def convert_all!(utf, dest_dir_path, options={})
+      create_target_path! dest_dir_path
       unless FileTest.directory?(dest_dir_path)
         raise "%p is not a directory" % dest_dir_path
       end
-      conv = self.new
-      utf.list.each do |emoji|
-        conv.convert_from_name! emoji.name, dest_dir_path, format
+      utf.each do |emoji|
+        convert_from_name! utf, dest_dir_path, emoji.name, options
       end
     end
 
@@ -35,6 +35,7 @@ module Emojidex
       @def_format = :png
     end
 
+  private
     # convert one file
     def convert!(source, destination, size = @def_size, format = @def_format)
       if FileTest.exist?(source) && FileTest.exist?(destination)
@@ -45,12 +46,10 @@ module Emojidex
 
       create_target_path! File.dirname(destination)
 
-      case format
-      when :png
-        surface.write_to_png(destination)
-      end
+      surface.write_to_png destination if format == :png
     end
 
+  private
     # convert one SVG to each-size PNGs
     def convert_standard_sizes!(source, destination, format = @def_format)
       @basic_sizes.each do |size|
@@ -64,8 +63,13 @@ module Emojidex
       end
     end
 
+  public
     # convert SVG to each-size PNGs, specify by emoji-name
-    def convert_from_name!(emoji_name, dest_path, format = :png)    # String, String, Symbol = :png
+    # options = {
+    #   format: Symbol = :png,
+    #   size: Fixnum/Symbol = nil(ALL sizes)
+    # }
+    def convert_from_name!(utf, dest_path, emoji_name, options={})
       src = File.dirname(File.expand_path(__FILE__)) + "/utf/#{emoji_name}"
       src = (if FileTest.directory?(src)
         src + '/0.svg'
@@ -73,16 +77,35 @@ module Emojidex
         src + '.svg'
       end)
 
+      format = options[:format] || @def_format
+
       # if dest is a directory-path, then make picture's path from emoji-name.
       dest = (if !FileTest.directory?(dest_path)
         dest_path
-      elsif dest_path[-1] == File::ALT_SEPARATOR || dest_path[-1] == File::SEPARATOR
+      elsif [File::ALT_SEPARATOR,File::SEPARATOR].include? dest_path[-1]
         "#{dest_path}#{emoji_name}.#{format}"
       else
         "#{dest_path}/#{emoji_name}.#{format}"
       end)
 
-      convert_standard_sizes! src, dest, format
+      destination = dest
+      create_target_path! File.dirname(destination)
+
+      size = options[:size]
+      size = (case size
+        when Fixnum then size
+        when Symbol then @resource_sizes[size]
+        else nil
+      end)
+
+      if size.nil?
+        convert_standard_sizes! src, dest_file_path, format
+      else
+        dest = get_sized_destination(dest_file_path, options[:size])
+        convert! src, dest, size, format
+        emoji = utf.where_name(emoji_name)
+        emoji.reload_image! dest if emoji
+      end
     end
 
   private
@@ -106,7 +129,7 @@ module Emojidex
     end
 
     def create_target_path!(path)
-      Dir.mkdir(path) unless FileTest.exist?(path)
+      FileUtils.mkpath(path) unless FileTest.exist?(path)
     end
 
     def svg_to_surface(file, target_size)

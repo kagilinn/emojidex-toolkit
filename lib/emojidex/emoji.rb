@@ -1,3 +1,5 @@
+require 'RMagick'
+
 #
 # Emojidex::Emoji
 #
@@ -7,6 +9,7 @@ module Emojidex
     attr_reader :name
     attr_reader :unicode
     attr_reader :tag
+    attr_reader :image_list
     alias category category_name
 
     # emoji_data(Hash)
@@ -25,6 +28,12 @@ module Emojidex
 
       @hash = emoji_data.dup
       @hash.freeze
+
+      @image_list = nil
+    end
+
+    def reload_image!(path)
+      @image_list = Magick::ImageList.new(path)
     end
 
     def to_s

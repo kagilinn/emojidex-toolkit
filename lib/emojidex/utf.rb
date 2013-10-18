@@ -8,11 +8,6 @@ module Emojidex
     attr_reader :categories
     alias categorys categories
 
-    def self.compile_assets(dest_dir_path)
-      obj = self.new
-      obj.compile_assets dest_dir_path
-    end
-
     def initialize
       json_path = File.join(File.dirname(File.expand_path(__FILE__)),
                        './utf/utf-emoji.json')
@@ -48,8 +43,8 @@ module Emojidex
       }.map{|h| @lookup_name[h['name']] }
     end
 
-    def compile_assets(dest_dir_path)
-      Converter.convert_all! self, dest_dir_path
+    def compile_assets(converter, dest_dir_path)
+      converter.convert_all! self, dest_dir_path
     end
 
     def emojify(src_str)
