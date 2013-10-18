@@ -78,11 +78,8 @@ module Emojidex
       if FileTest.exist?(source) && FileTest.exist?(destination)
         return nil if File.mtime(source) < File.mtime(destination)
       end
-
       surface = get_surface(source, size)
-
       create_target_path! File.dirname(destination)
-
       surface.write_to_png destination if format == :png
     end
 
@@ -92,7 +89,6 @@ module Emojidex
         convert!(source, get_sized_destination(destination, size.to_s),
                  size, format)
       end
-
       @resource_sizes.each do |size, px|
         convert!(source, get_sized_destination(destination, size.to_s),
                  px, format)
@@ -102,7 +98,6 @@ module Emojidex
     def get_surface(source, size)
       fm = FileMagic.new
       mime = fm.file source
-
       case mime
       when 'SVG Scalable Vector Graphics image'
         return svg_to_surface(source, size)
