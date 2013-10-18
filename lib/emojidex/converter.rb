@@ -37,23 +37,26 @@ module Emojidex
     #   format: Symbol = :png,
     #   size: Fixnum/Symbol = nil(ALL sizes)
     # }
-    def convert_from_name!(utf, dest_path, emoji_name, options={})
+    def convert_from_name!(utf, dest_dir, emoji_name, options={})
       src = File.dirname(File.expand_path(__FILE__))
       src << "/utf/#{emoji_name}"
       src << (FileTest.directory?(src) ? '/0.svg' : '.svg')
 
       format = options[:format] || @def_format
 
-      # if dest is a dir-path, then make picture's path from emoji-name.
-      dest_file_path = (if !FileTest.directory?(dest_path)
-        dest_path
-      elsif [File::ALT_SEPARATOR,File::SEPARATOR].include? dest_path[-1]
-        "#{dest_path}#{emoji_name}.#{format}"
-      else
-        "#{dest_path}/#{emoji_name}.#{format}"
-      end)
+      if FileTest.exist?(dest_dir) && !FileTest.directory?(dest_dir)
+        raise "%p is NOT a directory" % dest_dir
+      end
 
-      create_target_path! File.dirname(dest_file_path)
+      dest_file = dest_dir
+      if dest_file[-1] != File::ALT_SEPARATOR &&
+         dest_file[-1] != File::SEPARATOR
+      then
+        dest_file << "/"
+      end
+      dest_file << "#{emoji_name}.#{format}"
+
+      create_target_path! File.dirname(dest_file)
 
       size = options[:size]
       size = (case size
@@ -63,9 +66,9 @@ module Emojidex
       end)
 
       if size.nil?
-        convert_standard_sizes! src, dest_file_path, format
+        convert_standard_sizes! src, dest_file, format
       else
-        dest = get_sized_destination(dest_file_path, options[:size])
+        dest = get_sized_destination(dest_file, options[:size])
         convert! src, dest, size, format
         emoji = utf.where_name(emoji_name)
         emoji.reload_image! dest if emoji
