@@ -84,13 +84,13 @@ module Emojidex
     end
 
     # convert one SVG to each-size PNGs
-    def convert_standard_sizes!(source, destination, format = @def_format)
+    def convert_standard_sizes!(source, dest, format = @def_format)
       @basic_sizes.each do |size|
-        convert!(source, get_sized_destination(destination, size.to_s),
+        convert!(source, get_sized_destination(dest, size.to_s),
                  size, format)
       end
       @resource_sizes.each do |size, px|
-        convert!(source, get_sized_destination(destination, size.to_s),
+        convert!(source, get_sized_destination(dest, size.to_s),
                  px, format)
       end
     end
