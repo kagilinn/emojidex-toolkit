@@ -35,33 +35,6 @@ module Emojidex
       @def_format = :png
     end
 
-  private
-    # convert one file
-    def convert!(source, destination, size = @def_size, format = @def_format)
-      if FileTest.exist?(source) && FileTest.exist?(destination)
-        return nil if File.mtime(source) < File.mtime(destination)
-      end
-
-      surface = get_surface(source, size)
-
-      create_target_path! File.dirname(destination)
-
-      surface.write_to_png destination if format == :png
-    end
-
-    # convert one SVG to each-size PNGs
-    def convert_standard_sizes!(source, destination, format = @def_format)
-      @basic_sizes.each do |size|
-        convert!(source, get_sized_destination(destination, size.to_s),
-                 size, format)
-      end
-
-      @resource_sizes.each do |size, px|
-        convert!(source, get_sized_destination(destination, size.to_s),
-                 px, format)
-      end
-    end
-
   public
     # convert SVG to each-size PNGs, specify by emoji-name
     # options = {
@@ -108,6 +81,32 @@ module Emojidex
     end
 
   private
+    # convert one file
+    def convert!(source, destination, size = @def_size, format = @def_format)
+      if FileTest.exist?(source) && FileTest.exist?(destination)
+        return nil if File.mtime(source) < File.mtime(destination)
+      end
+
+      surface = get_surface(source, size)
+
+      create_target_path! File.dirname(destination)
+
+      surface.write_to_png destination if format == :png
+    end
+
+    # convert one SVG to each-size PNGs
+    def convert_standard_sizes!(source, destination, format = @def_format)
+      @basic_sizes.each do |size|
+        convert!(source, get_sized_destination(destination, size.to_s),
+                 size, format)
+      end
+
+      @resource_sizes.each do |size, px|
+        convert!(source, get_sized_destination(destination, size.to_s),
+                 px, format)
+      end
+    end
+
     def get_surface(source, size)
       fm = FileMagic.new
       mime = fm.file source
