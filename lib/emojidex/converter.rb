@@ -10,6 +10,14 @@ module Emojidex
   # Provides conversion facilities to create emoji 'glyphs'
   # from source images.
   class Converter
+    def initialize
+      @basic_sizes = [8, 16, 32, 64, 128, 256]
+      @resource_sizes = { ldpi: 9, mdpi: 18, hdpi: 27, xhdpi: 36 }
+      @formats = [:svg, :png, :webp]
+      @def_size = 64
+      @def_format = :png
+    end
+
     # options = {
     #   format: Symbol = @def_format,
     #   size: Fixnum/Symbol = nil(ALL sizes)
@@ -24,18 +32,6 @@ module Emojidex
       end
     end
 
-    #
-    # instance methods
-    #
-    def initialize
-      @basic_sizes = [8, 16, 32, 64, 128, 256]
-      @resource_sizes = { ldpi: 9, mdpi: 18, hdpi: 27, xhdpi: 36 }
-      @formats = [:svg, :png, :webp]
-      @def_size = 64
-      @def_format = :png
-    end
-
-  public
     # convert SVG to each-size PNGs, specify by emoji-name
     # options = {
     #   format: Symbol = :png,
