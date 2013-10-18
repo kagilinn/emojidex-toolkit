@@ -49,7 +49,6 @@ module Emojidex
       surface.write_to_png destination if format == :png
     end
 
-  private
     # convert one SVG to each-size PNGs
     def convert_standard_sizes!(source, destination, format = @def_format)
       @basic_sizes.each do |size|
