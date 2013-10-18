@@ -9,6 +9,7 @@ module Emojidex
     attr_reader :name
     attr_reader :unicode
     attr_reader :tag
+    attr_reader :image_paths
     attr_reader :image_list
     alias category category_name
 
@@ -29,11 +30,13 @@ module Emojidex
       @hash = emoji_data.dup
       @hash.freeze
 
+      @image_paths = []
       @image_list = nil
     end
 
-    def reload_image!(path)
-      @image_list = Magick::ImageList.new(path)
+    def reload_image!(*paths)
+      @image_paths = paths
+      @image_list = Magick::ImageList.new(*paths)
     end
 
     def to_s
