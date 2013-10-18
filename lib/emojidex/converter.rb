@@ -38,17 +38,14 @@ module Emojidex
     #   size: Fixnum/Symbol = nil(ALL sizes)
     # }
     def convert_from_name!(utf, dest_path, emoji_name, options={})
-      src = File.dirname(File.expand_path(__FILE__)) + "/utf/#{emoji_name}"
-      src = (if FileTest.directory?(src)
-        src + '/0.svg'
-      else
-        src + '.svg'
-      end)
+      src = File.dirname(File.expand_path(__FILE__))
+      src << "/utf/#{emoji_name}"
+      src << (FileTest.directory?(src) ? '/0.svg' : '.svg')
 
       format = options[:format] || @def_format
 
-      # if dest is a directory-path, then make picture's path from emoji-name.
-      dest = (if !FileTest.directory?(dest_path)
+      # if dest is a dir-path, then make picture's path from emoji-name.
+      dest_file_path = (if !FileTest.directory?(dest_path)
         dest_path
       elsif [File::ALT_SEPARATOR,File::SEPARATOR].include? dest_path[-1]
         "#{dest_path}#{emoji_name}.#{format}"
@@ -56,8 +53,7 @@ module Emojidex
         "#{dest_path}/#{emoji_name}.#{format}"
       end)
 
-      destination = dest
-      create_target_path! File.dirname(destination)
+      create_target_path! File.dirname(dest_file_path)
 
       size = options[:size]
       size = (case size
