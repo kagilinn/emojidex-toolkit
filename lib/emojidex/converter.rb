@@ -23,6 +23,7 @@ module Emojidex
     #   size: Fixnum/Symbol = nil(ALL sizes)
     # }
     def convert_all!(utf, dest_dir_path, options={})
+      dest_dir_path = File.expand_path(dest_dir_path)
       create_target_path! dest_dir_path
       unless FileTest.directory?(dest_dir_path)
         raise "%p is not a directory" % dest_dir_path
@@ -44,6 +45,7 @@ module Emojidex
 
       format = options[:format] || @def_format
 
+      dest_dir = File.expand_path(dest_dir)
       if FileTest.exist?(dest_dir) && !FileTest.directory?(dest_dir)
         raise "%p is NOT a directory" % dest_dir
       end
